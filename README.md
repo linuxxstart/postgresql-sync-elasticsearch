@@ -63,7 +63,7 @@ Caso o elasticsearch tenho usuário e senha, add os parâmetros abaixo:
 docker-compose exec postgres bash -c 'psql -U $POSTGRES_USER $POSTGRES_DATABASE -c "SELECT * FROM users"'
 
 # Verifique o conteúdo do Elasticsearch database:
-curl http://localhost:9200/users/_search?pretty
+curl http://localhost:9200/users-*/_search?pretty
 ```
 
 ### Criando usuário
