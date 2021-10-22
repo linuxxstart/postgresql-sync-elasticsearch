@@ -1,0 +1,33 @@
+{
+  "name": "test_db-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "tasks.max": "1",
+    "plugin.name": "pgoutput",
+    "publication.autocreate.mode": "filtered",
+    "database.hostname": "postgres",
+    "database.port": "5432",
+    "database.user": "postgres",
+    "database.password": "postgres",
+    "database.server.id": "184054",
+    "database.dbname": "test_db",
+    "database.server.name": "dbserver1",
+    "skipped.operations": "d",
+    "key.converter.schemas.enabled":"false",
+    "value.converter.schemas.enabled":"false",
+    "decimal.handling.mode":"string",
+    "hstore.handling.mode":"json",
+    "schema.refresh.mode":"columns_diff_exclude_unchanged_toast",
+    "snapshot.mode":"always",
+    "heartbeat.interval.ms": "3000",
+    "topic.creation.default.replication.factor": 1,
+    "topic.creation.default.partitions": 1,
+    "topic.creation.default.cleanup.policy": "delete",
+    "topic.creation.default.retention.ms": 30000,
+    "topic.creation.default.compression.type": "lz4",
+    "transforms": "route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+)\\.([^.]+)\\.([^.]+)",
+    "transforms.route.replacement": "$3"
+  }
+}

@@ -1,0 +1,101 @@
+version: "3"
+services:
+  zookeeper:
+    image: debezium/zookeeper:1.6
+    restart: always
+    ports:
+      - 2181:2181
+      - 2888:2888
+      - 3888:3888
+
+  kafka:
+    image: debezium/kafka:1.6
+    restart: always
+    ports:
+      - 9092:9092
+    links:
+      - zookeeper
+    environment:
+      - ZOOKEEPER_CONNECT=zookeeper:2181
+  
+  kafdrop:
+    image: obsidiandynamics/kafdrop
+    restart: "always"
+    ports:
+      - "9000:9000"
+    environment:
+      KAFKA_BROKERCONNECT: "kafka:9092"
+      JVM_OPTS: "-Xms300M -Xmx512M -Xss180K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify"
+    depends_on:
+      - "kafka"
+    links:
+      - kafka
+
+  apicurio:
+    image: apicurio/apicurio-registry-mem:2.0.0.Final
+    restart: always
+    ports:
+      - 8080:8080
+
+  postgres:
+    build: ./postgres
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DATABASE=test_db
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.1
+    restart: always
+    ports:
+      - 9200:9200
+    environment:
+      - http.host=0.0.0.0
+      - transport.host=127.0.0.1
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - TZ=America/Sao_Paulo
+  
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.14.1
+    restart: always
+    depends_on: 
+      - "elasticsearch"
+    ports: 
+      - 5601:5601
+    environment: 
+      - "ELASTICSEARCH_HOSTS=http://elasticsearch:9200"
+      - TZ=America/Sao_Paulo
+
+
+  connect:
+    build: ./debezium-elastic
+    restart: always
+    ports:
+      - 8083:8083
+    links:
+      - kafka
+      - postgres
+      - elasticsearch
+      - apicurio
+    environment:
+      - BOOTSTRAP_SERVERS=kafka:9092
+      - GROUP_ID=1
+      - CONFIG_STORAGE_TOPIC=my_connect_configs
+      - OFFSET_STORAGE_TOPIC=my_connect_offsets
+      - STATUS_STORAGE_TOPIC=my_connect_statuses
+      - ENABLE_APICURIO_CONVERTERS=true
+      - KEY_CONVERTER=io.apicurio.registry.utils.converter.AvroConverter
+      - VALUE_CONVERTER=io.apicurio.registry.utils.converter.AvroConverter
+      - CONNECT_KEY_CONVERTER=io.apicurio.registry.utils.converter.AvroConverter
+      - CONNECT_KEY_CONVERTER_APICURIO.REGISTRY_URL=http://apicurio:8080/apis/registry/v2
+      - CONNECT_KEY_CONVERTER_APICURIO_REGISTRY_AUTO-REGISTER=true
+      - CONNECT_KEY_CONVERTER_APICURIO_REGISTRY_FIND-LATEST=true
+      - CONNECT_VALUE_CONVERTER=io.apicurio.registry.utils.converter.AvroConverter
+      - CONNECT_VALUE_CONVERTER_APICURIO_REGISTRY_URL=http://apicurio:8080/apis/registry/v2
+      - CONNECT_VALUE_CONVERTER_APICURIO_REGISTRY_AUTO-REGISTER=true
+      - CONNECT_VALUE_CONVERTER_APICURIO_REGISTRY_FIND-LATEST=true
+      - TZ=America/Sao_Paulo

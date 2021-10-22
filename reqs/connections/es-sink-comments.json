@@ -1,0 +1,19 @@
+{
+  "name": "es-sink-comments",
+  "config": {
+    "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+    "tasks.max": "1",
+    "topics": "comments",
+    "connection.url": "http://elasticsearch:9200",
+    "transforms": "unwrap,routeTS",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "transforms.unwrap.drop.tombstones": "false",
+    "transforms.unwrap.drop.deletes": "false",
+    "transforms.routeTS.type":"org.apache.kafka.connect.transforms.TimestampRouter",  
+    "transforms.routeTS.topic.format":"${topic}-${timestamp}",  
+    "transforms.routeTS.timestamp.format":"yyyy.MM.dd",
+    "key.ignore": "true",
+    "schema.ignore": "true",
+    "behavior.on.null.values": "delete"
+  }
+}
