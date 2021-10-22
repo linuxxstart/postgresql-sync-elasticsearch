@@ -73,7 +73,7 @@ docker-compose exec postgres bash -c 'psql -U $POSTGRES_USER $POSTGRES_DATABASE'
 test_db=# INSERT INTO users (email) VALUES ('apple@gmail.com');
 
 # Verifique o conteúdo do Elasticsearch database:
-curl http://localhost:9200/users/_search?q=id:6
+curl http://localhost:9200/users-*/_search?q=id:6
 ```
 
 ```json
@@ -104,7 +104,7 @@ curl http://localhost:9200/users/_search?q=id:6
 test_db=# UPDATE users SET email = 'tesla@gmail.com' WHERE id = 6;
 
 # Verifique o conteúdo do Elasticsearch database:
-curl http://localhost:9200/users/_search?q=id:6
+curl http://localhost:9200/users-*/_search?q=id:6
 ```
 
 ```json
@@ -135,7 +135,7 @@ curl http://localhost:9200/users/_search?q=id:6
 test_db=# DELETE FROM users WHERE id = 6;
 
 # Verifique o conteúdo do Elasticsearch database:
-curl http://localhost:9200/users/_search?q=id:6
+curl http://localhost:9200/users-*/_search?q=id:6
 ```
 
 ```json
